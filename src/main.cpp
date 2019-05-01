@@ -16,6 +16,14 @@
 #include "utils.hpp"
 
 
+std::vector< std::string > signal_list = {
+	"voll", "explodiert", "falsch", "ausgegangen", "Kocher"
+};
+
+std::vector< std::string > compare_list = {
+	"Du hast wohl etwas falsch", "gemacht, dein Methkocher", "ist explodliert! Das tat weh!", "Da sie keine Materialien", "mehr haben, ist der Kocher", "ausgegangen!"
+};
+
 int main( ) {
 	SetConsoleTitle("assistance");
 	tesseract::TessBaseAPI tess;
@@ -48,11 +56,38 @@ int main( ) {
 		// recognize
 		tess.SetImage( pixs );
 		tess.Recognize( 0 );
-		std::cout << std::unique_ptr< char[] >( tess.GetUTF8Text( ) ).get( ) << std::endl;
-		log << std::unique_ptr< char[] >( tess.GetUTF8Text( ) ).get( ) << std::endl;
+		std::cout << "[ " << std::unique_ptr< char[] >( tess.GetUTF8Text( ) ).get( ) << " ]" << std::endl;
+		log << "[ " << std::unique_ptr< char[] >( tess.GetUTF8Text( ) ).get( ) << " ]" << std::endl;
 		std::string str = std::unique_ptr< char[] >( tess.GetUTF8Text( ) ).get( );
-		if ( string_contains( str, "voll" ) || string_contains( str, "explodiert" ) || string_contains( str, "falsch" ) ) {
-			Beep( 300, 300 );
+		if ( !str.empty( ) ) {
+
+			for ( auto s : signal_list ) {
+				if ( string_contains( str, s ) ) {
+					Beep( 300, 300 );
+					farm_state = false;
+					time_p end = std::chrono::high_resolution_clock::now( );
+					std::cout << "farmed: " << std::chrono::duration_cast< std::chrono::seconds >( end - start ).count( ) << "s" << std::endl;
+				}
+			}
+			if ( string_contains( str, "Sie kochen nun Meth" ) ) {
+				start = std::chrono::high_resolution_clock::now( );
+				Beep( 300, 300 );
+				std::cout << "Kochen gestartet" << std::endl;
+			}
+			else if ( string_contains( str, "Meth kochen beendet!" ) ) {
+				time_p end = std::chrono::high_resolution_clock::now( );
+				std::cout << "Gekocht: " << std::chrono::duration_cast< std::chrono::seconds >( end - start ).count( ) << "s" << std::endl;
+				Beep( 300, 300 );
+				std::cout << "Kochen beendet!" << std::endl;
+			}
+			for ( auto s : compare_list ) {
+				if ( string_contains( str, s ) ) {
+					Beep( 300, 300 );
+					farm_state = false;
+					time_p end = std::chrono::high_resolution_clock::now( );
+					std::cout << "Gekocht: " << std::chrono::duration_cast< std::chrono::seconds >( end - start ).count( ) << "s" << std::endl;
+				}
+			}
 		}
 
 		tess.Clear( );
