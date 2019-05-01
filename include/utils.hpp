@@ -105,7 +105,5 @@ static bool take_screenshot( HWND hWnd ) {
 }
 
 static bool string_contains( const std::string& str, const std::string& comp ) {
-	if ( str.find( comp ) != std::string::npos )
-		return true;
-	return false;
+	return str.find( comp ) != std::string::npos;
 }
