@@ -1,7 +1,10 @@
 //#define WIN64_LEAN_AND_MEAN
 #pragma once
 #include <Windows.h>
+#include <atlbase.h>
 #include <gdiplus.h>
+#include <memory>
+#include <vector>
 
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "gdi32.lib")
@@ -55,16 +58,16 @@ private:
 	ULONG_PTR token_{};
 };
 
-static bool take_screenshot( HWND hWnd ) {
-	using namespace Gdiplus;
 
+static bool take_screenshot( HWND hWnd, std::vector< uint8_t >& data ) {
+	using namespace Gdiplus;
 	gdiplus_init gdiplus;
 
 	HDC desktopdc = GetDC( hWnd );
 	HDC mydc = CreateCompatibleDC( desktopdc );
 
 	RECT target_rect;
-	GetWindowRect( hWnd, &target_rect );
+	GetClientRect( hWnd, &target_rect );
 	int width = target_rect.right - target_rect.left;
 	int height = target_rect.bottom - target_rect.top;
 
@@ -73,34 +76,55 @@ static bool take_screenshot( HWND hWnd ) {
 	BitBlt( mydc, 0, 0, width, height, desktopdc, 0, 0, SRCCOPY | CAPTUREBLT );
 	SelectObject( mydc, oldbmp );
 
-	Bitmap* b = Bitmap::FromHBITMAP( mybmp, NULL );
+	std::unique_ptr< Bitmap > b( Bitmap::FromHBITMAP( mybmp, NULL ) );
 
-	Rect rect2 = { 30, 30, 240, 140 };
+	Rect rect = { 30, 30, 240, 140 };
 
-	Bitmap* ba = b->Clone( rect2, b->GetPixelFormat( ) );
+
+	std::unique_ptr< Bitmap > ba( b->Clone( rect, b->GetPixelFormat( ) ) );
 	CLSID encoderClsid;
-	Status stat = GenericError;
 	if ( ba && GetEncoderClsid( L"image/png", &encoderClsid ) != -1 ) {
-		stat = ba->Save( L"screen.png", &encoderClsid, NULL );
+		//Status stat = ba->Save( L"screen.png", &encoderClsid, NULL );
+
+		CComPtr< IStream > istream;
+		CreateStreamOnHGlobal( NULL, TRUE, &istream );
+		Status stat = ba->Save( istream, &encoderClsid );
+		if ( stat != Gdiplus::Status::Ok ) {
+			// cleanup
+			SelectObject( mydc, oldbmp );
+			DeleteDC( mydc );
+			ReleaseDC( hWnd, desktopdc );
+			DeleteObject( mybmp );
+			return false;
+		}
+
+		//get memory handle associated with istream
+		HGLOBAL hg = NULL;
+		GetHGlobalFromStream( istream, &hg );
+
+		//copy IStream to buffer
+		const auto bufsize = static_cast< int >( GlobalSize( hg ) );
+		data.resize( bufsize );
+
+		//lock & unlock memory
+		const auto pImage = GlobalLock( hg );
+		memcpy( &data[ 0 ], pImage, bufsize );
+		GlobalUnlock( hg );
 	}
 	else {
-		delete b;
-		delete ba;
-
 		// cleanup
+		SelectObject( mydc, oldbmp );
+		DeleteDC( mydc );
 		ReleaseDC( hWnd, desktopdc );
 		DeleteObject( mybmp );
-		DeleteDC( mydc );
 		return false;
 	}
 
-	delete b;
-	delete ba;
-
 	// cleanup
+	SelectObject( mydc, oldbmp );
+	DeleteDC( mydc );
 	ReleaseDC( hWnd, desktopdc );
 	DeleteObject( mybmp );
-	DeleteDC( mydc );
 	return true;
 }
 

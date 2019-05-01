@@ -39,7 +39,6 @@ void farm_thread( HWND hwnd ) {
 	}
 }
 
-
 std::vector< std::string > signal_list = {
 	"voll", "explodiert", "falsch", "ausgegangen", "Kocher"
 };
@@ -50,6 +49,7 @@ std::vector< std::string > compare_list = {
 
 int main( ) {
 	SetConsoleTitle( "assistance" );
+	CoInitialize( NULL );
 	std::cout << "Start by pressing F10!" << std::endl;
 	tesseract::TessBaseAPI tess;
 
@@ -61,18 +61,29 @@ int main( ) {
 	std::ofstream log( "ocr_log.txt", std::fstream::app );
 
 	HWND hWnd = FindWindow( 0, "RAGE Multiplayer" );
+	if ( !hWnd ) {
+		std::cout << "Open RAGE Multiplayer!" << std::endl;
+		std::cin.get( );
+		return 0;
+	}
 
 	std::thread farm( farm_thread, hWnd );
 
 	while ( hWnd ) {
-		if ( !take_screenshot( hWnd ) )
+		hWnd = FindWindow( 0, "RAGE Multiplayer" );
+		if ( !hWnd )
+			continue;
+
+		std::vector< uint8_t > screen;
+		if ( !take_screenshot( hWnd, screen ) )
 			continue;
 
 		// setup
 		tess.SetPageSegMode( tesseract::PageSegMode::PSM_AUTO );
 		tess.SetVariable( "save_best_choices", "T" );
 		// read image
-		auto pixs = pixRead( "screen.png" );
+		auto pixs = pixReadMemPng( screen.data( ), screen.size( ) );
+		//auto pixs = pixRead( "screen.png" );
 		pixs = pixConvertRGBToGray( pixs, 0.0f, 0.0f, 0.0f ); //grey "filter"
 		pixs = pixScaleGrayLI( pixs, 5.5f, 5.5f ); // zoom
 		if ( !pixs ) {
@@ -115,17 +126,16 @@ int main( ) {
 				}
 			}
 		}
-
 		tess.Clear( );
-		//pixWrite("newscreen.png", pixs, IFF_PNG);
+		//pixWrite( "newscreen.png", pixs, IFF_PNG );
 		pixDestroy( &pixs );
 
-		hWnd = FindWindow( 0, "RAGE Multiplayer" );
-		std::this_thread::sleep_for( std::chrono::seconds( 5 ) );
+		std::this_thread::sleep_for( std::chrono::seconds( 3 ) );
 	}
 	kill_process = true;
 	farm_state = false;
 	farm.join( );
+	CoUninitialize( );
 	std::cout << "Open RAGE Multiplayer!" << std::endl;
 	std::cin.get( );
 
