@@ -15,6 +15,30 @@
 
 #include "utils.hpp"
 
+auto farm_state = false;
+auto kill_process = false;
+using time_p = std::chrono::high_resolution_clock::time_point;
+time_p start{};
+
+void farm_thread( HWND hwnd ) {
+	while ( !kill_process ) {
+		if ( GetAsyncKeyState( VK_F10 ) ) {
+			farm_state = !farm_state;
+			if ( farm_state )
+				start = std::chrono::high_resolution_clock::now( );
+			else
+				std::cout << "Farmen abgebrochen!" << std::endl;
+			std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
+		}
+		if ( farm_state ) {
+			SendMessage( hwnd, WM_KEYDOWN, 0x45, 0x390000 );
+			std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+			SendMessage( hwnd, WM_KEYUP, 0x45, 0x390000 );
+			std::this_thread::sleep_for( std::chrono::milliseconds( 500 ) );
+		}
+	}
+}
+
 
 std::vector< std::string > signal_list = {
 	"voll", "explodiert", "falsch", "ausgegangen", "Kocher"
@@ -25,7 +49,8 @@ std::vector< std::string > compare_list = {
 };
 
 int main( ) {
-	SetConsoleTitle("assistance");
+	SetConsoleTitle( "assistance" );
+	std::cout << "Start by pressing F10!" << std::endl;
 	tesseract::TessBaseAPI tess;
 
 	if ( tess.Init( "./tessdata", "deu" ) ) {
@@ -37,6 +62,7 @@ int main( ) {
 
 	HWND hWnd = FindWindow( 0, "RAGE Multiplayer" );
 
+	std::thread farm( farm_thread, hWnd );
 
 	while ( hWnd ) {
 		if ( !take_screenshot( hWnd ) )
@@ -97,6 +123,9 @@ int main( ) {
 		hWnd = FindWindow( 0, "RAGE Multiplayer" );
 		std::this_thread::sleep_for( std::chrono::seconds( 5 ) );
 	}
+	kill_process = true;
+	farm_state = false;
+	farm.join( );
 	std::cout << "Open RAGE Multiplayer!" << std::endl;
 	std::cin.get( );
 
