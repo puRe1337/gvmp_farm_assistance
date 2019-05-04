@@ -49,8 +49,8 @@ std::vector< std::string > compare_list = {
 
 int main( ) {
 	SetConsoleTitle( "assistance" );
-	CoInitialize( NULL );
-	std::cout << "Start by pressing F10!" << std::endl;
+	if ( IsValidCodePage( 65001 ) )
+		SetConsoleOutputCP( 65001 );
 	tesseract::TessBaseAPI tess;
 
 	if ( tess.Init( "./tessdata", "deu" ) ) {
