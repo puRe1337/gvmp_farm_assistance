@@ -1,3 +1,4 @@
 .cppan\*
 .vs\*
 build\*
+fmt*
