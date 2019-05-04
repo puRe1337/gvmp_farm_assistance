@@ -51,6 +51,8 @@ int main( ) {
 	SetConsoleTitle( "assistance" );
 	if ( IsValidCodePage( 65001 ) )
 		SetConsoleOutputCP( 65001 );
+	if ( FAILED( CoInitialize( NULL ) ) )
+		return 0;
 	tesseract::TessBaseAPI tess;
 
 	if ( tess.Init( "./tessdata", "deu" ) ) {
