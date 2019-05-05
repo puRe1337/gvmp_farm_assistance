@@ -74,69 +74,75 @@ int main( ) {
 
 	std::thread farm( farm_thread, hWnd );
 
+	timer t;
+	t.reset( );
+	timer t2;
+	t2.reset( );
 	try {
 		while ( hWnd ) {
 			hWnd = FindWindow( 0, "RAGE Multiplayer" );
 			if ( !hWnd )
 				continue;
+			if ( t.diff( ) >= 3 ) {
+				static Rect rect_farm = { 30, 30, 240, 140 };
+				std::vector< uint8_t > screen;
+				if ( !take_screenshot( hWnd, screen, rect_farm ) )
+					continue;
 
-			std::vector< uint8_t > screen;
-			if ( !take_screenshot( hWnd, screen ) )
-				continue;
+				// setup
+				tess.SetPageSegMode( tesseract::PageSegMode::PSM_AUTO );
+				tess.SetVariable( "save_best_choices", "T" );
+				// read image
+				auto pixs = pixReadMemPng( screen.data( ), screen.size( ) );
+				//auto pixs = pixRead( "screen.png" );
+				pixs = pixConvertRGBToGray( pixs, 0.0f, 0.0f, 0.0f ); //grey "filter"
+				pixs = pixScaleGrayLI( pixs, 5.5f, 5.5f ); // zoom
+				if ( !pixs ) {
+					continue;
+				}
 
-			// setup
-			tess.SetPageSegMode( tesseract::PageSegMode::PSM_AUTO );
-			tess.SetVariable( "save_best_choices", "T" );
-			// read image
-			auto pixs = pixReadMemPng( screen.data( ), screen.size( ) );
-			//auto pixs = pixRead( "screen.png" );
-			pixs = pixConvertRGBToGray( pixs, 0.0f, 0.0f, 0.0f ); //grey "filter"
-			pixs = pixScaleGrayLI( pixs, 5.5f, 5.5f ); // zoom
-			if ( !pixs ) {
-				continue;
-			}
+				// recognize
+				tess.SetImage( pixs );
+				tess.Recognize( 0 );
+				std::string str = std::unique_ptr< char[] >( tess.GetUTF8Text( ) ).get( );
+				fmt::print( "[{}]\n", str );
+				log << fmt::format( "[{}]\n", str );
+				if ( !str.empty( ) ) {
 
-			// recognize
-			tess.SetImage( pixs );
-			tess.Recognize( 0 );
-			std::string str = std::unique_ptr< char[] >( tess.GetUTF8Text( ) ).get( );
-			fmt::print( "[{}]\n", str );
-			log << fmt::format( "[{}]\n", str );
-			if ( !str.empty( ) ) {
-
-				for ( auto s : signal_list ) {
-					if ( string_contains( str, s ) ) {
-						Beep( 300, 300 );
-						farm_state = false;
-						time_p end = std::chrono::high_resolution_clock::now( );
-						fmt::print( "Gefarmt: {}s\n", std::chrono::duration_cast< std::chrono::seconds >( end - start ).count( ) );
+					for ( auto s : signal_list ) {
+						if ( string_contains( str, s ) ) {
+							Beep( 300, 300 );
+							farm_state = false;
+							time_p end = std::chrono::high_resolution_clock::now( );
+							fmt::print( "Gefarmt: {}s\n", std::chrono::duration_cast< std::chrono::seconds >( end - start ).count( ) );
+						}
 					}
-				}
-				if ( string_contains( str, "Sie kochen nun Meth" ) ) {
-					start = std::chrono::high_resolution_clock::now( );
-					Beep( 300, 300 );
-					fmt::print( "Kochen gestartet!\n" );
-				}
-				else if ( string_contains( str, "Meth kochen beendet!" ) ) {
-					time_p end = std::chrono::high_resolution_clock::now( );
-					fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< std::chrono::seconds >( end - start ).count( ) );
-					Beep( 300, 300 );
-					fmt::print( "Kochen beendet!\n" );
-				}
-				for ( auto s : compare_list ) {
-					if ( string_contains( str, s ) ) {
+					if ( string_contains( str, "Sie kochen nun Meth" ) ) {
+						start = std::chrono::high_resolution_clock::now( );
 						Beep( 300, 300 );
-						farm_state = false;
+						fmt::print( "Kochen gestartet!\n" );
+					}
+					else if ( string_contains( str, "Meth kochen beendet!" ) ) {
 						time_p end = std::chrono::high_resolution_clock::now( );
 						fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< std::chrono::seconds >( end - start ).count( ) );
+						Beep( 300, 300 );
+						fmt::print( "Kochen beendet!\n" );
+					}
+					for ( auto s : compare_list ) {
+						if ( string_contains( str, s ) ) {
+							Beep( 300, 300 );
+							farm_state = false;
+							time_p end = std::chrono::high_resolution_clock::now( );
+							fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< std::chrono::seconds >( end - start ).count( ) );
+						}
 					}
 				}
-			}
-			tess.Clear( );
-			//pixWrite( "newscreen.png", pixs, IFF_PNG );
-			pixDestroy( &pixs );
+				tess.Clear( );
+				//pixWrite( "newscreen.png", pixs, IFF_PNG );
+				pixDestroy( &pixs );
+				t.reset( );
 
-			std::this_thread::sleep_for( std::chrono::seconds( 3 ) );
+			}
 			if ( t2.diff( ) >= 10 ) {
 				auto col = scan_color( hWnd, 960, 670 );
 				if ( GetRValue(col) == 255 && GetGValue(col) == 151 && GetBValue(col) == 0 ) {
@@ -177,6 +183,7 @@ int main( ) {
 				}
 				t2.reset( );
 			}
+			std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 		}
 	}
 	catch ( const std::exception& e ) {
