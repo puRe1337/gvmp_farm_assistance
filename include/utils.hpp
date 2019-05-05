@@ -131,11 +131,9 @@ static COLORREF scan_color( HWND hWnd, int x, int y ) {
 	gdiplus_init gdiplus;
 
 	HDC desktopdc = GetDC( hWnd );
-	HDC mydc = CreateCompatibleDC( desktopdc );
 
-	auto pixel = GetPixel( mydc, x, y );
+	auto pixel = GetPixel( desktopdc, x, y );
 
-	DeleteDC( mydc );
 	ReleaseDC( hWnd, desktopdc );
 	return pixel;
 }
