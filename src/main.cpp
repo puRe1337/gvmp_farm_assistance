@@ -137,6 +137,46 @@ int main( ) {
 			pixDestroy( &pixs );
 
 			std::this_thread::sleep_for( std::chrono::seconds( 3 ) );
+			if ( t2.diff( ) >= 10 ) {
+				auto col = scan_color( hWnd, 960, 670 );
+				if ( GetRValue(col) == 255 && GetGValue(col) == 151 && GetBValue(col) == 0 ) {
+					static Rect rect_afk = { 765, 365, 390, 380 };
+					std::vector< uint8_t > screen;
+					if ( !take_screenshot( hWnd, screen, rect_afk ) )
+						continue;
+
+					// setup
+					tess.SetPageSegMode( tesseract::PageSegMode::PSM_AUTO );
+					tess.SetVariable( "save_best_choices", "T" );
+					// read image
+					auto pixs = pixReadMemPng( screen.data( ), screen.size( ) );
+					//auto pixs = pixRead( "screen.png" );
+					pixs = pixConvertRGBToGray( pixs, 0.0f, 0.0f, 0.0f ); //grey "filter"
+					pixs = pixScaleGrayLI( pixs, 5.5f, 5.5f ); // zoom
+					if ( !pixs ) {
+						continue;
+					}
+
+					// recognize
+					tess.SetImage( pixs );
+					tess.Recognize( 0 );
+					std::string str = std::unique_ptr< char[] >( tess.GetUTF8Text( ) ).get( );
+					if ( !str.empty( ) ) {
+						if ( string_contains( str, "Bist du noch da" ) || string_contains( str, "ICH BIN NOCH DA" ) || string_contains( str, "anwesend" ) ) {
+							fmt::print( "AFK-Check gefunden!\n" );
+							Beep( 500, 500 );
+
+							POINT p = { 960, 670 };
+							ClientToScreen( hWnd, &p );
+							SendMessage( hWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(p.x, p.y) );
+							SendMessage( hWnd, WM_LBUTTONUP, 0, MAKELPARAM(p.x, p.y) );
+						}
+					}
+					tess.Clear( );
+					pixDestroy( &pixs );
+				}
+				t2.reset( );
+			}
 		}
 	}
 	catch ( const std::exception& e ) {
