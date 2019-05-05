@@ -59,7 +59,7 @@ private:
 };
 
 
-static bool take_screenshot( HWND hWnd, std::vector< uint8_t >& data ) {
+static bool take_screenshot( HWND hWnd, std::vector< uint8_t >& data, Rect rect ) {
 	using namespace Gdiplus;
 	gdiplus_init gdiplus;
 
@@ -77,8 +77,6 @@ static bool take_screenshot( HWND hWnd, std::vector< uint8_t >& data ) {
 	SelectObject( mydc, oldbmp );
 
 	std::unique_ptr< Bitmap > b( Bitmap::FromHBITMAP( mybmp, NULL ) );
-
-	Rect rect = { 30, 30, 240, 140 };
 
 
 	std::unique_ptr< Bitmap > ba( b->Clone( rect, b->GetPixelFormat( ) ) );
