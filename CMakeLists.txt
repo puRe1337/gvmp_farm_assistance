@@ -22,7 +22,7 @@ add_subdirectory(.cppan)
 add_subdirectory(fmt-5.3.0 EXCLUDE_FROM_ALL)
 #include_directories(include)
 
-add_executable(gvmp_farm_assistance src/main.cpp include/utils.hpp)
+add_executable(gvmp_farm_assistance src/main.cpp include/utils.hpp include/timer.hpp)
 target_include_directories(gvmp_farm_assistance PUBLIC include)
 target_link_libraries(gvmp_farm_assistance
     pvt.cppan.demo.google.tesseract.libtesseract
