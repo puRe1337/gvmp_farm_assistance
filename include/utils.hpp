@@ -128,6 +128,20 @@ static bool take_screenshot( HWND hWnd, std::vector< uint8_t >& data ) {
 	return true;
 }
 
+static COLORREF scan_color( HWND hWnd, int x, int y ) {
+	using namespace Gdiplus;
+	gdiplus_init gdiplus;
+
+	HDC desktopdc = GetDC( hWnd );
+	HDC mydc = CreateCompatibleDC( desktopdc );
+
+	auto pixel = GetPixel( mydc, x, y );
+
+	DeleteDC( mydc );
+	ReleaseDC( hWnd, desktopdc );
+	return pixel;
+}
+
 static bool string_contains( const std::string& str, const std::string& comp ) {
 	return str.find( comp ) != std::string::npos;
 }
