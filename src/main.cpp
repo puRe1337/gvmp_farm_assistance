@@ -83,11 +83,24 @@ int main( ) {
 	t.reset( );
 	timer t2;
 	t2.reset( );
+	timer t3;
+	t3.reset( );
+	auto t3_reset_once = true;
 	try {
-		while ( hWnd ) {
+		while ( 1 ) {
 			hWnd = FindWindow( 0, window_name );
-			if ( !hWnd )
+			if ( !hWnd ) {
+				if ( t3_reset_once ) {
+					t3_reset_once = false;
+					t3.reset( );
+				}
 				continue;
+			}
+			t3.reset( ); //reset if "window_name" found
+			if ( !t3_reset_once )
+				t3_reset_once = true;
+			if ( t3.diff( ) >= ( 60.0 * 15.0 ) ) //break if window has not been found since 15 minutes
+				break;
 			if ( t.diff( ) >= 3 ) {
 				static Rect rect_farm = { 30, 30, 240, 140 };
 				std::vector< uint8_t > screen;
