@@ -17,6 +17,9 @@
 #include <timer.hpp>
 #include <fmt/format.h>
 
+
+constexpr auto window_name = "RAGE Multiplayer";
+
 auto farm_state = false;
 auto kill_process = false;
 using time_p = std::chrono::high_resolution_clock::time_point;
@@ -65,9 +68,9 @@ int main( ) {
 	}
 	std::ofstream log( "ocr_log.txt", std::fstream::app );
 
-	HWND hWnd = FindWindow( 0, "RAGE Multiplayer" );
+	HWND hWnd = FindWindow( 0, window_name );
 	if ( !hWnd ) {
-		fmt::print( "Open RAGE Multiplayer!\n" );
+		fmt::print( "Open {}!\n", window_name );
 		std::cin.get( );
 		return 0;
 	}
@@ -80,7 +83,7 @@ int main( ) {
 	t2.reset( );
 	try {
 		while ( hWnd ) {
-			hWnd = FindWindow( 0, "RAGE Multiplayer" );
+			hWnd = FindWindow( 0, window_name );
 			if ( !hWnd )
 				continue;
 			if ( t.diff( ) >= 3 ) {
@@ -196,7 +199,7 @@ int main( ) {
 	farm.join( );
 	tess.End( );
 	CoUninitialize( );
-	fmt::print( "Open RAGE Multiplayer!\n" );
+	fmt::print( "Open {}!\n", window_name );
 	std::cin.get( );
 
 
