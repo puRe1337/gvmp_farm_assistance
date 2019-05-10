@@ -4,9 +4,10 @@
 class timer
 {
 	using milli = std::chrono::milliseconds;
-	using seconds = /*td::chrono::seconds;*/ std::chrono::duration< double, std::ratio< 1 > >;
-	using time_point = std::chrono::time_point< std::chrono::high_resolution_clock >;
+	using time_point = std::chrono::high_resolution_clock::time_point;
 public:
+	using seconds = /*td::chrono::seconds;*/ std::chrono::duration< double, std::ratio< 1 > >;
+
 	auto diff( ) const {
 		return std::chrono::duration_cast< seconds >( std::chrono::high_resolution_clock::now( ) - m_time ).count( );
 	}
