@@ -41,6 +41,7 @@ void farm_thread( HWND hwnd ) {
 			SendMessage( hwnd, WM_KEYUP, 0x45, 0x390000 );
 			std::this_thread::sleep_for( std::chrono::milliseconds( 500 ) );
 		}
+		std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 	}
 }
 
