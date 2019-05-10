@@ -67,6 +67,7 @@ int main( ) {
 		std::cin.get( );
 		return 0;
 	}
+	tess.SetVariable( "debug_file", "tesseract.log" );
 	std::ofstream log( "ocr_log.txt", std::fstream::app );
 
 	HWND hWnd = FindWindow( 0, window_name );
@@ -118,7 +119,7 @@ int main( ) {
 							Beep( 300, 300 );
 							farm_state = false;
 							time_p end = std::chrono::high_resolution_clock::now( );
-							fmt::print( "Gefarmt: {}s\n", std::chrono::duration_cast< std::chrono::seconds >( end - start ).count( ) );
+							fmt::print( "Gefarmt: {}s\n", std::chrono::duration_cast< timer::seconds >( end - start ).count( ) );
 						}
 					}
 					if ( string_contains( str, "Sie kochen nun Meth" ) ) {
@@ -128,7 +129,7 @@ int main( ) {
 					}
 					else if ( string_contains( str, "Meth kochen beendet!" ) ) {
 						time_p end = std::chrono::high_resolution_clock::now( );
-						fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< std::chrono::seconds >( end - start ).count( ) );
+						fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< timer::seconds >( end - start ).count( ) );
 						Beep( 300, 300 );
 						fmt::print( "Kochen beendet!\n" );
 					}
@@ -137,7 +138,7 @@ int main( ) {
 							Beep( 300, 300 );
 							farm_state = false;
 							time_p end = std::chrono::high_resolution_clock::now( );
-							fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< std::chrono::seconds >( end - start ).count( ) );
+							fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< timer::seconds >( end - start ).count( ) );
 						}
 					}
 				}
@@ -198,6 +199,7 @@ int main( ) {
 	kill_process = true;
 	farm_state = false;
 	farm.join( );
+	tess.Clear( );
 	tess.End( );
 	CoUninitialize( );
 	fmt::print( "Open {}!\n", window_name );
