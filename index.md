@@ -6,6 +6,4 @@ Features:
 
 Last Update: 11.05.2019 00:20
 
-<MTMarkdownOptions output='raw'>
-  <a href="https://dl.headzfetz.pw/gvmp" class="btn">Download</a>
-</MTMarkdownOptions>
+<a href="https://dl.headzfetz.pw/gvmp" class="btn" style="background-color: #64b5f6; color: white;">Download</a>
