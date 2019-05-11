@@ -1,4 +1,3 @@
-# GVMP Farm Assistance
 Der GVMP Farm Assistance erleichtert dir auf [GVMP](https://www.gvmp.de) das Farmen.
 Features:
 * Die Taste E wird simuliert, sogar wenn du auf dem Desktop bist
@@ -7,4 +6,6 @@ Features:
 
 Last Update: 11.05.2019 00:20
 
-<a href="https://dl.headzfetz.pw/gvmp" class="btn">Download</a>
+<MTMarkdownOptions output='raw'>
+  <a href="https://dl.headzfetz.pw/gvmp" class="btn">Download</a>
+</MTMarkdownOptions>
