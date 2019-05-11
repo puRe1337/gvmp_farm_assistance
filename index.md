@@ -7,4 +7,4 @@ Features:
 
 Last Update: 11.05.2019 00:20
 
-[Click me](http://www.google.com){: .btn}
+<a href="https://dl.headzfetz.pw/gvmp" class="btn">Download</a>
