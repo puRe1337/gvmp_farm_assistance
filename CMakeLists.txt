@@ -21,7 +21,7 @@ endif()
 
 #set(CPPAN_BUILD_SHARED_LIBS ON)
 add_subdirectory(.cppan)
-add_subdirectory(fmt-5.3.0 EXCLUDE_FROM_ALL)
+add_subdirectory(fmt EXCLUDE_FROM_ALL)
 #include_directories(include)
 
 add_executable(gvmp_farm_assistance src/main.cpp include/utils.hpp include/timer.hpp gvmp_farm_assistance.rc)
