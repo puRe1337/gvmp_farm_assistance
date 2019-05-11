@@ -5,6 +5,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake Targets")
 
 project(gvmp_farm_assistance C CXX)
+set(CMAKE_CXX_STANDARD 20)
 
 # Output directory settings
 set(output_dir ${CMAKE_BINARY_DIR}/bin)
@@ -12,11 +13,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${output_dir})
 
 if (MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /std:c++latest")
     set(CMAKE_CXX_FLAGS_RELEASE "/MT")
     set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
-else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 endif()
 
 #set(CPPAN_BUILD_SHARED_LIBS ON)
