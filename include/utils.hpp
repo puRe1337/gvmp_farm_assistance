@@ -141,3 +141,22 @@ static COLORREF scan_color( HWND hWnd, int x, int y ) {
 static bool string_contains( const std::string& str, const std::string& comp ) {
 	return str.find( comp ) != std::string::npos;
 }
+
+static std::string get_ocr_text( tesseract::TessBaseAPI& tess, const std::vector< uint8_t >& image ) {
+	// read image
+	auto pixs = pixReadMemPng( image.data( ), image.size( ) );
+	//auto pixs = pixRead( "screen.png" );
+	pixs = pixConvertRGBToGray( pixs, 0.0f, 0.0f, 0.0f ); //grey "filter"
+	pixs = pixScaleGrayLI( pixs, 5.5f, 5.5f ); // zoom
+	if ( !pixs ) {
+		return {};
+	}
+
+	// recognize
+	tess.SetImage( pixs );
+	tess.Recognize( 0 );
+	std::string str = std::unique_ptr< char[] >( tess.GetUTF8Text( ) ).get( );
+	tess.Clear( );
+	pixDestroy( &pixs );
+	return str;
+}

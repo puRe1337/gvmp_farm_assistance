@@ -67,6 +67,9 @@ int main( ) {
 		std::cin.get( );
 		return 0;
 	}
+	// setup
+	tess.SetPageSegMode( tesseract::PageSegMode::PSM_AUTO );
+	tess.SetVariable( "save_best_choices", "T" );
 	tess.SetVariable( "debug_file", "tesseract.log" );
 	std::ofstream log( "ocr_log.txt", std::fstream::app );
 
@@ -106,23 +109,7 @@ int main( ) {
 				std::vector< uint8_t > screen;
 				if ( !take_screenshot( hWnd, screen, rect_farm ) )
 					continue;
-
-				// setup
-				tess.SetPageSegMode( tesseract::PageSegMode::PSM_AUTO );
-				tess.SetVariable( "save_best_choices", "T" );
-				// read image
-				auto pixs = pixReadMemPng( screen.data( ), screen.size( ) );
-				//auto pixs = pixRead( "screen.png" );
-				pixs = pixConvertRGBToGray( pixs, 0.0f, 0.0f, 0.0f ); //grey "filter"
-				pixs = pixScaleGrayLI( pixs, 5.5f, 5.5f ); // zoom
-				if ( !pixs ) {
-					continue;
-				}
-
-				// recognize
-				tess.SetImage( pixs );
-				tess.Recognize( 0 );
-				std::string str = std::unique_ptr< char[] >( tess.GetUTF8Text( ) ).get( );
+				auto str = get_ocr_text( tess, screen );
 				fmt::print( "[{}]\n", str );
 				log << fmt::format( "[{}]\n", str );
 				if ( !str.empty( ) ) {
@@ -155,10 +142,6 @@ int main( ) {
 						}
 					}
 				}
-				tess.Clear( );
-				//pixWrite( "newscreen.png", pixs, IFF_PNG );
-				pixDestroy( &pixs );
-				t.reset( );
 
 			}
 			if ( t2.diff( ) >= 10 ) {
@@ -169,22 +152,7 @@ int main( ) {
 					if ( !take_screenshot( hWnd, screen, rect_afk ) )
 						continue;
 
-					// setup
-					tess.SetPageSegMode( tesseract::PageSegMode::PSM_AUTO );
-					tess.SetVariable( "save_best_choices", "T" );
-					// read image
-					auto pixs = pixReadMemPng( screen.data( ), screen.size( ) );
-					//auto pixs = pixRead( "screen.png" );
-					pixs = pixConvertRGBToGray( pixs, 0.0f, 0.0f, 0.0f ); //grey "filter"
-					pixs = pixScaleGrayLI( pixs, 5.5f, 5.5f ); // zoom
-					if ( !pixs ) {
-						continue;
-					}
-
-					// recognize
-					tess.SetImage( pixs );
-					tess.Recognize( 0 );
-					std::string str = std::unique_ptr< char[] >( tess.GetUTF8Text( ) ).get( );
+					std::string str = get_ocr_text( tess, screen );
 					if ( !str.empty( ) ) {
 						if ( string_contains( str, "Bist du noch da" ) || string_contains( str, "ICH BIN NOCH DA" ) || string_contains( str, "anwesend" ) ) {
 							fmt::print( "AFK-Check gefunden!\n" );
@@ -196,8 +164,7 @@ int main( ) {
 							SendMessage( hWnd, WM_LBUTTONUP, 0, MAKELPARAM(p.x, p.y) );
 						}
 					}
-					tess.Clear( );
-					pixDestroy( &pixs );
+
 				}
 				t2.reset( );
 			}
