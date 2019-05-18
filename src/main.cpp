@@ -142,7 +142,7 @@ int main( ) {
 						}
 					}
 				}
-
+				t.reset( );
 			}
 			if ( t2.diff( ) >= 10 ) {
 				auto col = scan_color( hWnd, 960, 670 );
