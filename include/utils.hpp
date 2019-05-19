@@ -5,6 +5,9 @@
 #include <gdiplus.h>
 #include <memory>
 #include <vector>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
 
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "gdi32.lib")
@@ -143,6 +146,48 @@ static bool string_contains( const std::string& str, const std::string& comp ) {
 }
 
 static std::vector< std::pair< int, int > > scan_for_image( const std::vector< uint8_t >& screen_data, const std::string& path ) {
+	std::vector< std::pair< int, int > > return_vec;
+
+	cv::Mat img = cv::imdecode( screen_data, cv::IMREAD_GRAYSCALE );
+	auto templ = cv::imread( path, cv::IMREAD_GRAYSCALE );
+
+	int match_method = cv::TM_CCOEFF_NORMED;
+	int result_cols = img.cols - templ.cols + 1;
+	int result_rows = img.rows - templ.rows + 1;
+	cv::Mat result;
+	result.create( result_rows, result_cols, CV_32FC1 );
+
+	cv::matchTemplate( img, templ, result, match_method );
+
+	//normalize(result, result, 0, 1, cv::NORM_MINMAX, -1, cv::Mat());
+
+	cv::threshold( result, result, 0.7, 1., cv::THRESH_BINARY );
+	int count = 0;
+	while ( 1 ) {
+		double minVal;
+		double maxVal;
+		cv::Point minLoc;
+		cv::Point maxLoc;
+		cv::Point matchLoc;
+		cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat( ) );
+		matchLoc = maxLoc;
+		auto min_thresh = ( minVal + 1e-6 ) * 1.5;
+		//printf("%f\n", min_thresh);
+		if ( maxVal >= min_thresh ) {
+			return_vec.emplace_back( matchLoc.x + ( templ.cols / 2 ), matchLoc.y + ( templ.rows / 2 ) );
+			cv::rectangle( img, matchLoc, cv::Point( matchLoc.x + templ.cols, matchLoc.y + templ.rows ), cv::Scalar::all( 0 ), 2, 8, 0 );
+			cv::rectangle( result, matchLoc, cv::Point( matchLoc.x + templ.cols, matchLoc.y + templ.rows ), cv::Scalar::all( 0 ), 2, 8, 0 );
+		}
+		else
+			break;
+	}
+	//cv::imshow( path, img );
+	//cv::imshow("template", templ);
+	//cv::waitKey( 1 );
+
+	return return_vec;
+}
+
 static std::string get_ocr_text( tesseract::TessBaseAPI& tess, const std::vector< uint8_t >& image, bool scale ) {
 	// read image
 	auto pixs = pixReadMemPng( image.data( ), image.size( ) );

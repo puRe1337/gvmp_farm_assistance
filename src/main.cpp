@@ -21,6 +21,7 @@
 constexpr auto window_name = "RAGE Multiplayer";
 
 auto farm_state = false;
+auto switch_state = false;
 auto kill_process = false;
 using time_p = std::chrono::high_resolution_clock::time_point;
 time_p start{};
@@ -51,7 +52,7 @@ int main( ) {
 		SetConsoleOutputCP( 65001 );
 	if ( FAILED( CoInitialize( NULL ) ) )
 		return 0;
-	fmt::print( "Start by pressing F10!\n" );
+	fmt::print( "F10 = Start, F11 = Auto switch!\n" );
 	tesseract::TessBaseAPI tess;
 
 	if ( tess.Init( "./tessdata", "deu" ) ) {
@@ -105,6 +106,15 @@ int main( ) {
 					fmt::print( "Farmen abgebrochen!\n" );
 				std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
 			}
+			if ( GetAsyncKeyState( VK_F11 ) & 1 ) {
+				switch_state = !switch_state;
+				if ( switch_state )
+					fmt::print( "Auto Switch start!\n" );
+				else
+					fmt::print( "Auto Switch abgebrochen!\n" );
+				std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
+			}
+
 			if ( t.diff( ) >= 3 ) {
 				static Rect rect_farm = { 30, 30, 240, 140 };
 				std::vector< uint8_t > screen;
@@ -169,6 +179,76 @@ int main( ) {
 				}
 				t2.reset( );
 			}
+
+			if ( switch_state ) {
+				auto col1 = scan_color( hWnd, 500, 300 );
+				auto col2 = scan_color( hWnd, 1020, 300 );
+				auto check1 = GetRValue(col1) >= 254 && GetGValue(col1) >= 254 && GetBValue(col1) >= 254;
+				auto check2 = GetRValue(col2) >= 254 && GetGValue(col2) >= 254 && GetBValue(col2) >= 254;
+				if ( check1 && check2 ) {
+					static Rect rect_rucksack = { 453, 250, 484, 552 };
+					std::vector< uint8_t > rucksack;
+					if ( !take_screenshot( hWnd, rucksack, rect_rucksack ) )
+						continue;
+					static Rect rect_kofferraum = { 977, 250, 483, 552 };
+					std::vector< uint8_t > koferraum;
+					if ( !take_screenshot( hWnd, koferraum, rect_kofferraum ) )
+						continue;
+
+
+					static Rect rect_ocr_rucksack = { 477, 300, 213, 54 };
+					std::vector< uint8_t > ocr_rucksack;
+					if ( !take_screenshot( hWnd, ocr_rucksack, rect_ocr_rucksack ) )
+						continue;
+
+					static Rect rect_ocr_kofferraum = { 1010, 300, 213, 54 };
+					std::vector< uint8_t > ocr_kofferaum;
+					if ( !take_screenshot( hWnd, ocr_kofferaum, rect_ocr_kofferraum ) )
+						continue;
+
+					auto str = get_ocr_text( tess, ocr_kofferaum, false );
+					auto str2 = get_ocr_text( tess, ocr_rucksack, false );
+
+					if ( string_contains( str, "Kofferraum" ) && string_contains( str2, "Rucksack" ) ) {
+
+						//printf( "Leere Slots Rucksack: %llu\n", scan_for_image( rucksack, R"(D:\cpp_projects\gvmp_farm_assistance\blank.png)" ).size( ) );
+						//printf( "Leere Slots Kofferraum: %llu\n", scan_for_image( koferraum, R"(D:\cpp_projects\gvmp_farm_assistance\blank.png)" ).size( ) );
+						auto item = scan_for_image( rucksack, "./img/Kroeten.png" );
+						if ( item.empty( ) ) {
+							item = scan_for_image( rucksack, "./img/Kroeten2.png" );
+							if ( item.empty( ) )
+								item = scan_for_image( rucksack, "./img/Zinkkohle.png" );
+						}
+						auto koffer = scan_for_image( koferraum, "./img/blank.png" );
+						if ( !item.empty( ) && !koffer.empty( ) ) {
+							auto [x, y] = item.at( 0 );
+							printf( "Smartphone: %d %d\n", x, y );
+
+							auto [x2, y2] = koffer.at( 0 );
+							printf( "Freier Platz Kofferraum: %d %d\n", x2, y2 );
+
+							POINT p = { x + 435, y + 250 };
+							ClientToScreen( hWnd, &p );
+
+							POINT p2 = { x2 + 977, y2 + 250 };
+							ClientToScreen( hWnd, &p2 );
+
+							SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p.x, p.y) ); //maus auf das item was eingelagert werden soll
+							std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+							SendMessage( hWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(p.x, p.y) ); //klick auf "item"
+							std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+							SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p2.x, p2.y) ); //move to freie platz
+							std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+							SendMessage( hWnd, WM_LBUTTONUP, 0, MAKELPARAM(p2.x, p2.y) );
+						}
+						else if ( !item.empty( ) && koffer.empty( ) ) {
+							//0xff880000 down, 0x00780000 up
+							SendMessage( hWnd, WM_MOUSEWHEEL, 0xff880000, MAKELPARAM(1161, 496) );
+						}
+					}
+				}
+			}
+
 			std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 		}
 	}
