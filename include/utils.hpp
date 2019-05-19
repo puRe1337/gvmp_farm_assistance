@@ -207,3 +207,16 @@ static std::string get_ocr_text( tesseract::TessBaseAPI& tess, const std::vector
 	pixDestroy( &pixs );
 	return str;
 }
+
+static void send_opencar_msg( HWND hWnd ) {
+	SendMessage( hWnd, WM_KEYDOWN, 0x58, 0x390000 ); // KEY X DOWN
+	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(1170, 379) ); // move mouse
+	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+	SendMessage( hWnd, WM_KEYUP, 0x58, 0x390000 ); // KEY X UP
+	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+	//0x49
+	SendMessage( hWnd, WM_KEYDOWN, 0x49, 0x390000 ); // KEY I DOWN
+	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+	SendMessage( hWnd, WM_KEYUP, 0x49, 0x390000 ); // KEY I UP
+}

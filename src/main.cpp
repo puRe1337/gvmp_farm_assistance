@@ -144,6 +144,10 @@ int main( ) {
 						Beep( 300, 300 );
 						fmt::print( "Kochen beendet!\n" );
 					}
+					else if ( string_contains( str, "Inventar ist voll" ) ) {
+						fmt::print( "Inventar voll, �ffne Kofferraum\n" );
+						send_opencar_msg( hWnd );
+					}
 					for ( auto s : compare_list ) {
 						if ( string_contains( str, s ) ) {
 							Beep( 300, 300 );
