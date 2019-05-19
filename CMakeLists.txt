@@ -21,6 +21,10 @@ endif()
 add_subdirectory(.cppan)
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
 #include_directories(include)
+set(OpenCV_DIR "D:/User/Downloads/opencv-4.1.0/opencv-4.1.0/build/install")
+set(OpenCV_STATIC FALSE)
+FIND_PACKAGE(OpenCV REQUIRED core highgui imgcodecs imgproc)
+
 
 add_executable(gvmp_farm_assistance src/main.cpp include/utils.hpp include/timer.hpp gvmp_farm_assistance.rc)
 target_include_directories(gvmp_farm_assistance PUBLIC include)
@@ -28,4 +32,19 @@ target_link_libraries(gvmp_farm_assistance
     pvt.cppan.demo.google.tesseract.libtesseract
     pvt.cppan.demo.danbloomberg.leptonica
     fmt-header-only
+    ${OpenCV_LIBS}
 )
+message(${OpenCV_LIBS})
+
+MACRO (COPY_DLL trgt libname)
+        ADD_CUSTOM_COMMAND (
+        TARGET ${trgt}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND}
+        ARGS -E copy "${OpenCV_DIR}/x64/vc16/bin/${libname}.dll" $<TARGET_FILE_DIR:${trgt}>
+    )
+ENDMACRO (COPY_DLL)
+COPY_DLL(gvmp_farm_assistance opencv_core410)
+COPY_DLL(gvmp_farm_assistance opencv_highgui410)
+COPY_DLL(gvmp_farm_assistance opencv_imgcodecs410)
+COPY_DLL(gvmp_farm_assistance opencv_imgproc410)

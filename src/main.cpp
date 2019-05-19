@@ -145,7 +145,7 @@ int main( ) {
 						fmt::print( "Kochen beendet!\n" );
 					}
 					else if ( string_contains( str, "Inventar ist voll" ) ) {
-						fmt::print( "Inventar voll, ï¿½ffne Kofferraum\n" );
+						fmt::print( "Inventar voll, öffne Kofferraum\n" );
 						send_opencar_msg( hWnd );
 					}
 					for ( auto s : compare_list ) {
