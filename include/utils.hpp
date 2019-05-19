@@ -142,7 +142,7 @@ static bool string_contains( const std::string& str, const std::string& comp ) {
 	return str.find( comp ) != std::string::npos;
 }
 
-static std::string get_ocr_text( tesseract::TessBaseAPI& tess, const std::vector< uint8_t >& image ) {
+static std::vector< std::pair< int, int > > scan_for_image( const std::vector< uint8_t >& screen_data, const std::string& path ) {
 static std::string get_ocr_text( tesseract::TessBaseAPI& tess, const std::vector< uint8_t >& image, bool scale ) {
 	// read image
 	auto pixs = pixReadMemPng( image.data( ), image.size( ) );
