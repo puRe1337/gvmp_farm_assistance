@@ -29,9 +29,7 @@ time_p start{};
 void farm_thread( HWND hwnd ) {
 	while ( !kill_process ) {
 		if ( farm_state ) {
-			SendMessage( hwnd, WM_KEYDOWN, 0x45, 0x390000 );
-			std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-			SendMessage( hwnd, WM_KEYUP, 0x45, 0x390000 );
+			send_key_msg( hwnd, 0x45 );
 			std::this_thread::sleep_for( std::chrono::milliseconds( 500 ) );
 		}
 		std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
@@ -237,17 +235,11 @@ int main( ) {
 							POINT p2 = { x2 + 977, y2 + 250 };
 							ClientToScreen( hWnd, &p2 );
 
-							SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p.x, p.y) ); //maus auf das item was eingelagert werden soll
-							std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-							SendMessage( hWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(p.x, p.y) ); //klick auf "item"
-							std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-							SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p2.x, p2.y) ); //move to freie platz
-							std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-							SendMessage( hWnd, WM_LBUTTONUP, 0, MAKELPARAM(p2.x, p2.y) );
+							send_move_item_msg( hWnd, p, p2 );
 						}
 						else if ( !item.empty( ) && koffer.empty( ) ) {
 							//0xff880000 down, 0x00780000 up
-							SendMessage( hWnd, WM_MOUSEWHEEL, 0xff880000, MAKELPARAM(1161, 496) );
+							send_mwheel_down_msg( hWnd, { 1161, 496 } );
 						}
 					}
 				}
