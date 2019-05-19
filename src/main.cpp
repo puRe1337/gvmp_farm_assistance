@@ -27,14 +27,6 @@ time_p start{};
 
 void farm_thread( HWND hwnd ) {
 	while ( !kill_process ) {
-		if ( GetAsyncKeyState( VK_F10 ) & 1 ) {
-			farm_state = !farm_state;
-			if ( farm_state )
-				start = std::chrono::high_resolution_clock::now( );
-			else
-				fmt::print( "Farmen abgebrochen!\n" );
-			std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
-		}
 		if ( farm_state ) {
 			SendMessage( hwnd, WM_KEYDOWN, 0x45, 0x390000 );
 			std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
@@ -104,6 +96,15 @@ int main( ) {
 			t3.reset( ); //reset if "window_name" found
 			if ( !t3_reset_once )
 				t3_reset_once = true;
+
+			if ( GetAsyncKeyState( VK_F10 ) & 1 ) {
+				farm_state = !farm_state;
+				if ( farm_state )
+					start = std::chrono::high_resolution_clock::now( );
+				else
+					fmt::print( "Farmen abgebrochen!\n" );
+				std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
+			}
 			if ( t.diff( ) >= 3 ) {
 				static Rect rect_farm = { 30, 30, 240, 140 };
 				std::vector< uint8_t > screen;
