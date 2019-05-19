@@ -109,7 +109,7 @@ int main( ) {
 				std::vector< uint8_t > screen;
 				if ( !take_screenshot( hWnd, screen, rect_farm ) )
 					continue;
-				auto str = get_ocr_text( tess, screen );
+				auto str = get_ocr_text( tess, screen, true );
 				fmt::print( "[{}]\n", str );
 				log << fmt::format( "[{}]\n", str );
 				if ( !str.empty( ) ) {
@@ -152,7 +152,7 @@ int main( ) {
 					if ( !take_screenshot( hWnd, screen, rect_afk ) )
 						continue;
 
-					std::string str = get_ocr_text( tess, screen );
+					std::string str = get_ocr_text( tess, screen, true );
 					if ( !str.empty( ) ) {
 						if ( string_contains( str, "Bist du noch da" ) || string_contains( str, "ICH BIN NOCH DA" ) || string_contains( str, "anwesend" ) ) {
 							fmt::print( "AFK-Check gefunden!\n" );

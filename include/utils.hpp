@@ -143,11 +143,13 @@ static bool string_contains( const std::string& str, const std::string& comp ) {
 }
 
 static std::string get_ocr_text( tesseract::TessBaseAPI& tess, const std::vector< uint8_t >& image ) {
+static std::string get_ocr_text( tesseract::TessBaseAPI& tess, const std::vector< uint8_t >& image, bool scale ) {
 	// read image
 	auto pixs = pixReadMemPng( image.data( ), image.size( ) );
 	//auto pixs = pixRead( "screen.png" );
 	pixs = pixConvertRGBToGray( pixs, 0.0f, 0.0f, 0.0f ); //grey "filter"
-	pixs = pixScaleGrayLI( pixs, 5.5f, 5.5f ); // zoom
+	if ( scale )
+		pixs = pixScaleGrayLI( pixs, 5.5f, 5.5f ); // zoom
 	if ( !pixs ) {
 		return {};
 	}
