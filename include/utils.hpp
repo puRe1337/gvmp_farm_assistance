@@ -241,9 +241,3 @@ static void send_mwheel_down_msg( HWND hWnd, POINT p ) {
 	//0xff880000 down, 0x00780000 up
 	PostMessage( hWnd, WM_MOUSEWHEEL, 0xff880000, MAKELPARAM(p.x ,p.y) );
 }
-
-static void stop_farming( HWND hWnd ) {
-	send_key_msg( hWnd, 0x45 );
-	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	send_opencar_msg( hWnd );
-}
