@@ -19,23 +19,13 @@
 #include "globals.hpp"
 
 
-
-void farm_thread( HWND hwnd ) {
-	while ( !kill_process ) {
-		if ( farm_state ) {
-			send_key_msg( hwnd, 0x45 );
-			std::this_thread::sleep_for( std::chrono::milliseconds( 500 ) );
-		}
-		std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	}
-}
 int main( ) {
 	SetConsoleTitle( "assistance" );
 	if ( IsValidCodePage( 65001 ) )
 		SetConsoleOutputCP( 65001 );
 	if ( FAILED( CoInitialize( NULL ) ) )
 		return 0;
-	fmt::print( "F10 = Start, F11 = Auto switch!\n" );
+	fmt::print( "F11 = Auto switch!\n" );
 	tesseract::TessBaseAPI tess;
 
 	if ( tess.Init( "./tessdata", "deu" ) ) {
@@ -56,7 +46,6 @@ int main( ) {
 		return 0;
 	}
 
-	std::thread farm( farm_thread, hWnd );
 
 	timer t;
 	t.reset( );
@@ -81,14 +70,6 @@ int main( ) {
 			if ( !t3_reset_once )
 				t3_reset_once = true;
 
-			if ( GetAsyncKeyState( VK_F10 ) & 1 ) {
-				farm_state = !farm_state;
-				if ( farm_state )
-					start = std::chrono::high_resolution_clock::now( );
-				else
-					fmt::print( "Farmen abgebrochen!\n" );
-				std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
-			}
 			if ( GetAsyncKeyState( VK_F11 ) & 1 ) {
 				globals::switch_state = !globals::switch_state;
 				if ( globals::switch_state )
@@ -111,32 +92,37 @@ int main( ) {
 					for ( auto s : globals::signal_list ) {
 						if ( string_contains( str, s ) ) {
 							Beep( 300, 300 );
-							farm_state = false;
 							time_p end = std::chrono::high_resolution_clock::now( );
 							fmt::print( "Gefarmt: {}s\n", std::chrono::duration_cast< timer::seconds >( end - globals::start ).count( ) );
 						}
 					}
-					if ( string_contains( str, "Sie kochen nun Meth" ) ) {
-						start = std::chrono::high_resolution_clock::now( );
+					if ( string_contains( str, "Farming gestartet" ) ) {
+						//Farmen gestartet
 						globals::start = std::chrono::high_resolution_clock::now( );
 						Beep( 300, 300 );
+						fmt::print( "Farmen gestartet!\n" );
+					}
+					else if ( string_contains( str, "Sie kochen nun Meth" ) ) {
+						//Kochen gestartet
 						globals::start = std::chrono::high_resolution_clock::now( );
+						Beep( 300, 300 );
 						fmt::print( "Kochen gestartet!\n" );
 					}
 					else if ( string_contains( str, "Meth kochen beendet!" ) ) {
+						//Kochen beendet
 						time_p end = std::chrono::high_resolution_clock::now( );
 						fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< timer::seconds >( end - globals::start ).count( ) );
 						Beep( 300, 300 );
 						fmt::print( "Kochen beendet!\n" );
 					}
-					else if ( string_contains( str, "Inventar ist voll" ) ) {
+					else if ( string_contains( str, "Inventar ist voll" ) || string_contains( str, "Farming beendet" ) ) {
+						//Farmen beendet
 						fmt::print( "Inventar voll, �ffne Kofferraum\n" );
-						send_opencar_msg( hWnd );
+						stop_farming( hWnd );
 					}
 					for ( auto s : globals::compare_list ) {
 						if ( string_contains( str, s ) ) {
 							Beep( 300, 300 );
-							farm_state = false;
 							time_p end = std::chrono::high_resolution_clock::now( );
 							fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< timer::seconds >( end - globals::start ).count( ) );
 						}
@@ -239,11 +225,6 @@ int main( ) {
 	catch ( const std::exception& e ) {
 		std::cerr << e.what( ) << std::endl;
 	}
-
-
-	kill_process = true;
-	farm_state = false;
-	farm.join( );
 	tess.Clear( );
 	tess.End( );
 	CoUninitialize( );
