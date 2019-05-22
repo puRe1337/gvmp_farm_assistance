@@ -186,33 +186,49 @@ int main( ) {
 
 					if ( string_contains( str, "Kofferraum" ) && string_contains( str2, "Rucksack" ) ) {
 						auto found_item = globals::item_definitions::null;
-						//printf( "Leere Slots Rucksack: %llu\n", scan_for_image( rucksack, R"(D:\cpp_projects\gvmp_farm_assistance\blank.png)" ).size( ) );
-						//printf( "Leere Slots Kofferraum: %llu\n", scan_for_image( koferraum, R"(D:\cpp_projects\gvmp_farm_assistance\blank.png)" ).size( ) );
 						auto item = scan_for_image( rucksack, "./img/Kroeten.png" );
 						found_item = globals::item_kroete;
 						if ( item.empty( ) ) {
 							item = scan_for_image( rucksack, "./img/Kroeten2.png" );
-							if ( item.empty( ) )
+							found_item = globals::item_kroete2;
+							if ( item.empty( ) ) {
 								item = scan_for_image( rucksack, "./img/Zinkkohle.png" );
+								found_item = globals::item_zinkkohle;
+								if ( item.empty( ) ) {
+									item = scan_for_image( rucksack, "./img/Aramidfaser.png" );
+									found_item = globals::item_aramidfaser;
+									if ( item.empty( ) )
+										found_item = globals::item_definitions::null;
+								}
+							}
 						}
+						fmt::print( "Found {}[{}], {} times\n", globals::item_names.at( found_item ), found_item, item.size( ) );
 						auto koffer = scan_for_image( koferraum, "./img/blank.png" );
 						if ( !item.empty( ) && !koffer.empty( ) ) {
-							auto [x, y] = item.at( 0 );
-							printf( "Smartphone: %d %d\n", x, y );
+							if ( item.size( ) > koffer.size( ) ) {
+								send_mwheel_down_msg( hWnd, { 1161, 496 } );
+								continue;
+							}
+							for ( decltype(item.size( )) i = 0; i < item.size( ); i++ ) {
+								auto [x, y] = item.at( i );
+								fmt::print( "Item {}[{}]: {} {}\n", globals::item_names.at( found_item ), found_item, x, y );
 
-							auto [x2, y2] = koffer.at( 0 );
-							printf( "Freier Platz Kofferraum: %d %d\n", x2, y2 );
+								auto [x2, y2] = koffer.at( i );
+								fmt::print( "Freier Platz im Kofferraum: {} {}\n", x2, y2 );
 
-							POINT p = { x + 435, y + 250 };
-							ClientToScreen( hWnd, &p );
+								POINT p = { x + 435, y + 250 };
+								ClientToScreen( hWnd, &p );
 
-							POINT p2 = { x2 + 977, y2 + 250 };
-							ClientToScreen( hWnd, &p2 );
+								POINT p2 = { x2 + 977, y2 + 250 };
+								ClientToScreen( hWnd, &p2 );
 
-							send_move_item_msg( hWnd, p, p2 );
+								send_move_item_msg( hWnd, p, p2 );
+							}
+							send_key_msg( hWnd, VK_ESCAPE );
+							std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+							send_opencar_msg( hWnd );
 						}
 						else if ( !item.empty( ) && koffer.empty( ) ) {
-							//0xff880000 down, 0x00780000 up
 							send_mwheel_down_msg( hWnd, { 1161, 496 } );
 						}
 					}
