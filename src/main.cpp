@@ -16,15 +16,9 @@
 #include <utils.hpp>
 #include <timer.hpp>
 #include <fmt/format.h>
+#include "globals.hpp"
 
 
-constexpr auto window_name = "RAGE Multiplayer";
-
-auto farm_state = false;
-auto switch_state = false;
-auto kill_process = false;
-using time_p = std::chrono::high_resolution_clock::time_point;
-time_p start{};
 
 void farm_thread( HWND hwnd ) {
 	while ( !kill_process ) {
@@ -35,15 +29,6 @@ void farm_thread( HWND hwnd ) {
 		std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 	}
 }
-
-std::vector< std::string > signal_list = {
-	"voll", "explodiert", "falsch", "ausgegangen", "Kocher"
-};
-
-std::vector< std::string > compare_list = {
-	"Du hast wohl etwas falsch", "gemacht, dein Methkocher", "ist explodliert! Das tat weh!", "Da sie keine Materialien", "mehr haben, ist der Kocher", "ausgegangen!"
-};
-
 int main( ) {
 	SetConsoleTitle( "assistance" );
 	if ( IsValidCodePage( 65001 ) )
@@ -64,9 +49,9 @@ int main( ) {
 	tess.SetVariable( "debug_file", "tesseract.log" );
 	std::ofstream log( "ocr_log.txt", std::fstream::app );
 
-	HWND hWnd = FindWindow( 0, window_name );
+	HWND hWnd = FindWindow( 0, globals::window_name );
 	if ( !hWnd ) {
-		fmt::print( "Open {}!\n", window_name );
+		fmt::print( "Open {}!\n", globals::window_name );
 		std::cin.get( );
 		return 0;
 	}
@@ -82,7 +67,7 @@ int main( ) {
 	auto t3_reset_once = true;
 	try {
 		while ( 1 ) {
-			hWnd = FindWindow( 0, window_name );
+			hWnd = FindWindow( 0, globals::window_name );
 			if ( !hWnd ) {
 				if ( t3_reset_once ) {
 					t3_reset_once = false;
@@ -105,8 +90,8 @@ int main( ) {
 				std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
 			}
 			if ( GetAsyncKeyState( VK_F11 ) & 1 ) {
-				switch_state = !switch_state;
-				if ( switch_state )
+				globals::switch_state = !globals::switch_state;
+				if ( globals::switch_state )
 					fmt::print( "Auto Switch start!\n" );
 				else
 					fmt::print( "Auto Switch abgebrochen!\n" );
@@ -123,35 +108,37 @@ int main( ) {
 				log << fmt::format( "[{}]\n", str );
 				if ( !str.empty( ) ) {
 
-					for ( auto s : signal_list ) {
+					for ( auto s : globals::signal_list ) {
 						if ( string_contains( str, s ) ) {
 							Beep( 300, 300 );
 							farm_state = false;
 							time_p end = std::chrono::high_resolution_clock::now( );
-							fmt::print( "Gefarmt: {}s\n", std::chrono::duration_cast< timer::seconds >( end - start ).count( ) );
+							fmt::print( "Gefarmt: {}s\n", std::chrono::duration_cast< timer::seconds >( end - globals::start ).count( ) );
 						}
 					}
 					if ( string_contains( str, "Sie kochen nun Meth" ) ) {
 						start = std::chrono::high_resolution_clock::now( );
+						globals::start = std::chrono::high_resolution_clock::now( );
 						Beep( 300, 300 );
+						globals::start = std::chrono::high_resolution_clock::now( );
 						fmt::print( "Kochen gestartet!\n" );
 					}
 					else if ( string_contains( str, "Meth kochen beendet!" ) ) {
 						time_p end = std::chrono::high_resolution_clock::now( );
-						fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< timer::seconds >( end - start ).count( ) );
+						fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< timer::seconds >( end - globals::start ).count( ) );
 						Beep( 300, 300 );
 						fmt::print( "Kochen beendet!\n" );
 					}
 					else if ( string_contains( str, "Inventar ist voll" ) ) {
-						fmt::print( "Inventar voll, öffne Kofferraum\n" );
+						fmt::print( "Inventar voll, ï¿½ffne Kofferraum\n" );
 						send_opencar_msg( hWnd );
 					}
-					for ( auto s : compare_list ) {
+					for ( auto s : globals::compare_list ) {
 						if ( string_contains( str, s ) ) {
 							Beep( 300, 300 );
 							farm_state = false;
 							time_p end = std::chrono::high_resolution_clock::now( );
-							fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< timer::seconds >( end - start ).count( ) );
+							fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< timer::seconds >( end - globals::start ).count( ) );
 						}
 					}
 				}
@@ -182,7 +169,7 @@ int main( ) {
 				t2.reset( );
 			}
 
-			if ( switch_state ) {
+			if ( globals::switch_state ) {
 				auto col1 = scan_color( hWnd, 500, 300 );
 				auto col2 = scan_color( hWnd, 1020, 300 );
 				auto check1 = GetRValue(col1) >= 254 && GetGValue(col1) >= 254 && GetBValue(col1) >= 254;
@@ -212,10 +199,11 @@ int main( ) {
 					auto str2 = get_ocr_text( tess, ocr_rucksack, false );
 
 					if ( string_contains( str, "Kofferraum" ) && string_contains( str2, "Rucksack" ) ) {
-
+						auto found_item = globals::item_definitions::null;
 						//printf( "Leere Slots Rucksack: %llu\n", scan_for_image( rucksack, R"(D:\cpp_projects\gvmp_farm_assistance\blank.png)" ).size( ) );
 						//printf( "Leere Slots Kofferraum: %llu\n", scan_for_image( koferraum, R"(D:\cpp_projects\gvmp_farm_assistance\blank.png)" ).size( ) );
 						auto item = scan_for_image( rucksack, "./img/Kroeten.png" );
+						found_item = globals::item_kroete;
 						if ( item.empty( ) ) {
 							item = scan_for_image( rucksack, "./img/Kroeten2.png" );
 							if ( item.empty( ) )
@@ -259,7 +247,7 @@ int main( ) {
 	tess.Clear( );
 	tess.End( );
 	CoUninitialize( );
-	fmt::print( "Open {}!\n", window_name );
+	fmt::print( "Open {}!\n", globals::window_name );
 	std::cin.get( );
 
 
