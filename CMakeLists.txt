@@ -26,7 +26,7 @@ set(OpenCV_STATIC FALSE)
 FIND_PACKAGE(OpenCV REQUIRED core highgui imgcodecs imgproc)
 
 
-add_executable(gvmp_farm_assistance src/main.cpp include/utils.hpp include/timer.hpp gvmp_farm_assistance.rc)
+add_executable(gvmp_farm_assistance src/main.cpp include/utils.hpp include/timer.hpp include/globals.hpp gvmp_farm_assistance.rc)
 target_include_directories(gvmp_farm_assistance PUBLIC include)
 target_link_libraries(gvmp_farm_assistance
     pvt.cppan.demo.google.tesseract.libtesseract
