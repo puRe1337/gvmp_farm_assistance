@@ -117,7 +117,7 @@ int main( ) {
 					}
 					else if ( string_contains( str, "Inventar ist voll" ) || string_contains( str, "Farming beendet" ) ) {
 						//Farmen beendet
-						fmt::print( "Inventar voll, ï¿½ffne Kofferraum\n" );
+						fmt::print( "Inventar voll, öffne Kofferraum\n" );
 						stop_farming( hWnd );
 					}
 					for ( auto s : globals::compare_list ) {
