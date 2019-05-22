@@ -148,8 +148,8 @@ static bool string_contains( const std::string& str, const std::string& comp ) {
 static std::vector< std::pair< int, int > > scan_for_image( const std::vector< uint8_t >& screen_data, const std::string& path ) {
 	std::vector< std::pair< int, int > > return_vec;
 
-	cv::Mat img = cv::imdecode( screen_data, cv::IMREAD_GRAYSCALE );
-	auto templ = cv::imread( path, cv::IMREAD_GRAYSCALE );
+	cv::Mat img = cv::imdecode( screen_data, cv::IMREAD_COLOR );
+	auto templ = cv::imread( path, cv::IMREAD_COLOR );
 
 	int match_method = cv::TM_CCOEFF_NORMED;
 	int result_cols = img.cols - templ.cols + 1;
