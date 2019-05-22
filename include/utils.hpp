@@ -208,35 +208,42 @@ static std::string get_ocr_text( tesseract::TessBaseAPI& tess, const std::vector
 	return str;
 }
 
-static void send_key_msg(HWND hWnd, uint32_t key) {
-	SendMessage(hWnd, WM_KEYDOWN, key, 0x390000); // KEY DOWN
-	std::this_thread::sleep_for(std::chrono::milliseconds(1));
-	SendMessage(hWnd, WM_KEYUP, key, 0x390000); // KEY UP
+static void send_key_msg( HWND hWnd, uint32_t key ) {
+	PostMessage( hWnd, WM_KEYDOWN, key, 0x390000 ); // KEY DOWN
+	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+	PostMessage( hWnd, WM_KEYUP, key, 0x390000 ); // KEY UP
 }
 
 static void send_opencar_msg( HWND hWnd ) {
-	SendMessage( hWnd, WM_KEYDOWN, 0x58, 0x390000 ); // KEY X DOWN
+	PostMessage( hWnd, WM_KEYDOWN, 0x58, 0x390000 ); // KEY X DOWN
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(1170, 379) ); // move mouse
+	PostMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(1170, 379) ); // move mouse
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	SendMessage( hWnd, WM_KEYUP, 0x58, 0x390000 ); // KEY X UP
+	PostMessage( hWnd, WM_KEYUP, 0x58, 0x390000 ); // KEY X UP
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 	//0x49
-	SendMessage( hWnd, WM_KEYDOWN, 0x49, 0x390000 ); // KEY I DOWN
+	PostMessage( hWnd, WM_KEYDOWN, 0x49, 0x390000 ); // KEY I DOWN
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	SendMessage( hWnd, WM_KEYUP, 0x49, 0x390000 ); // KEY I UP
+	PostMessage( hWnd, WM_KEYUP, 0x49, 0x390000 ); // KEY I UP
 }
 
 static void send_move_item_msg( HWND hWnd, POINT p, POINT p2 ) {
-	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p.x, p.y) ); //maus auf das item was eingelagert werden soll
+	PostMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p.x, p.y) ); //maus auf das item was eingelagert werden soll
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	SendMessage( hWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(p.x, p.y) ); //klick auf "item"
+	PostMessage( hWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(p.x, p.y) ); //klick auf "item"
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p2.x, p2.y) ); //move to freie platz
+	PostMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p2.x, p2.y) ); //move to freie platz
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	SendMessage( hWnd, WM_LBUTTONUP, 0, MAKELPARAM(p2.x, p2.y) );
+	PostMessage( hWnd, WM_LBUTTONUP, 0, MAKELPARAM(p2.x, p2.y) );
 }
 
 static void send_mwheel_down_msg( HWND hWnd, POINT p ) {
-	SendMessage( hWnd, WM_MOUSEWHEEL, 0xff880000, MAKELPARAM(p.x ,p.y) );
+	//0xff880000 down, 0x00780000 up
+	PostMessage( hWnd, WM_MOUSEWHEEL, 0xff880000, MAKELPARAM(p.x ,p.y) );
+}
+
+static void stop_farming( HWND hWnd ) {
+	send_key_msg( hWnd, 0x45 );
+	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+	send_opencar_msg( hWnd );
 }
