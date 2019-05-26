@@ -70,6 +70,15 @@ int main( ) {
 			if ( !t3_reset_once )
 				t3_reset_once = true;
 
+			if ( GetAsyncKeyState( VK_NUMPAD0 ) & 1 ) {
+				send_closecar_msg( hWnd );
+				std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+			}
+			if ( GetAsyncKeyState( VK_F9 ) & 1 ) {
+				send_opencar_msg( hWnd );
+				std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+			}
+
 			if ( GetAsyncKeyState( VK_F11 ) & 1 ) {
 				globals::switch_state = !globals::switch_state;
 				if ( globals::switch_state )
