@@ -8,6 +8,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+#include "globals.hpp"
 
 #pragma comment(lib, "user32.lib")
 #pragma comment(lib, "gdi32.lib")
@@ -146,7 +147,7 @@ static bool string_contains( const std::string& str, const std::string& comp ) {
 }
 
 static std::vector< std::pair< int, int > > scan_for_image( const std::vector< uint8_t >& screen_data, const std::string& path ) {
-	std::vector< std::pair< int, int > > return_vec;
+	std::vector< std::pair< int, int > > return_vec{};
 
 	cv::Mat img = cv::imdecode( screen_data, cv::IMREAD_COLOR );
 	auto templ = cv::imread( path, cv::IMREAD_COLOR );
@@ -209,35 +210,63 @@ static std::string get_ocr_text( tesseract::TessBaseAPI& tess, const std::vector
 }
 
 static void send_key_msg( HWND hWnd, uint32_t key ) {
-	PostMessage( hWnd, WM_KEYDOWN, key, 0x390000 ); // KEY DOWN
+	SendMessage( hWnd, WM_KEYDOWN, key, 0x390000 ); // KEY DOWN
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	PostMessage( hWnd, WM_KEYUP, key, 0x390000 ); // KEY UP
+	SendMessage( hWnd, WM_KEYUP, key, 0x390000 ); // KEY UP
 }
 
 static void send_opencar_msg( HWND hWnd ) {
-	PostMessage( hWnd, WM_KEYDOWN, 0x58, 0x390000 ); // KEY X DOWN
+	SendMessage( hWnd, WM_KEYDOWN, 0x58, 0x390000 ); // KEY X DOWN
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	PostMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(1170, 379) ); // move mouse
+	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(1170, 379) ); // move mouse
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	PostMessage( hWnd, WM_KEYUP, 0x58, 0x390000 ); // KEY X UP
+	SendMessage( hWnd, WM_KEYUP, 0x58, 0x390000 ); // KEY X UP
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	//0x49
-	PostMessage( hWnd, WM_KEYDOWN, 0x49, 0x390000 ); // KEY I DOWN
+	//0x49 = I
+	send_key_msg( hWnd, 0x49 );
+}
+
+static void send_closecar_msg( HWND hWnd ) {
+	SendMessage( hWnd, WM_KEYDOWN, 0x58, 0x390000 ); // KEY X DOWN
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	PostMessage( hWnd, WM_KEYUP, 0x49, 0x390000 ); // KEY I UP
+	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(1170, 379) ); // move mouse
+	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+	SendMessage( hWnd, WM_KEYUP, 0x58, 0x390000 ); // KEY X UP
+	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 }
 
 static void send_move_item_msg( HWND hWnd, POINT p, POINT p2 ) {
-	PostMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p.x, p.y) ); //maus auf das item was eingelagert werden soll
+	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p.x, p.y) ); //maus auf das item was eingelagert werden soll
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	PostMessage( hWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(p.x, p.y) ); //klick auf "item"
+	SendMessage( hWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(p.x, p.y) ); //klick auf "item"
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	PostMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p2.x, p2.y) ); //move to freie platz
+	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p2.x, p2.y) ); //move to freie platz
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	PostMessage( hWnd, WM_LBUTTONUP, 0, MAKELPARAM(p2.x, p2.y) );
+	SendMessage( hWnd, WM_LBUTTONUP, 0, MAKELPARAM(p2.x, p2.y) );
 }
 
 static void send_mwheel_down_msg( HWND hWnd, POINT p ) {
 	//0xff880000 down, 0x00780000 up
-	PostMessage( hWnd, WM_MOUSEWHEEL, 0xff880000, MAKELPARAM(p.x ,p.y) );
+	SendMessage( hWnd, WM_MOUSEWHEEL, 0xff880000, MAKELPARAM(p.x ,p.y) );
+}
+
+static std::vector< std::pair< int, int > > scan_for_items( const std::vector< uint8_t >& screen_data, globals::item_definitions& found_item ) {
+	found_item = globals::item_definitions::null;
+	auto item = scan_for_image( screen_data, "./img/Kroeten.png" );
+	found_item = globals::item_kroete;
+	if ( item.empty( ) ) {
+		item = scan_for_image( screen_data, "./img/Kroeten2.png" );
+		found_item = globals::item_kroete2;
+		if ( item.empty( ) ) {
+			item = scan_for_image( screen_data, "./img/Zinkkohle.png" );
+			found_item = globals::item_zinkkohle;
+			if ( item.empty( ) ) {
+				item = scan_for_image( screen_data, "./img/Aramidfaser.png" );
+				found_item = globals::item_aramidfaser;
+				if ( item.empty( ) )
+					found_item = globals::item_definitions::null;
+			}
+		}
+	}
+	return item;
 }
