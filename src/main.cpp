@@ -115,11 +115,6 @@ int main( ) {
 						Beep( 300, 300 );
 						fmt::print( "Kochen beendet!\n" );
 					}
-					else if ( string_contains( str, "Inventar ist voll" ) || string_contains( str, "Farming beendet" ) ) {
-						//Farmen beendet
-						fmt::print( "Inventar voll, öffne Kofferraum\n" );
-						send_opencar_msg( hWnd );
-					}
 					for ( auto s : globals::compare_list ) {
 						if ( string_contains( str, s ) ) {
 							Beep( 300, 300 );
@@ -186,34 +181,28 @@ int main( ) {
 
 					if ( string_contains( str, "Kofferraum" ) && string_contains( str2, "Rucksack" ) ) {
 						auto found_item = globals::item_definitions::null;
-						auto item = scan_for_image( rucksack, "./img/Kroeten.png" );
-						found_item = globals::item_kroete;
-						if ( item.empty( ) ) {
-							item = scan_for_image( rucksack, "./img/Kroeten2.png" );
-							found_item = globals::item_kroete2;
-							if ( item.empty( ) ) {
-								item = scan_for_image( rucksack, "./img/Zinkkohle.png" );
-								found_item = globals::item_zinkkohle;
-								if ( item.empty( ) ) {
-									item = scan_for_image( rucksack, "./img/Aramidfaser.png" );
-									found_item = globals::item_aramidfaser;
-									if ( item.empty( ) )
-										found_item = globals::item_definitions::null;
-								}
-							}
-						}
+						auto item = scan_for_items( rucksack, found_item );
 						fmt::print( "Found {}[{}], {} times\n", globals::item_names.at( found_item ), found_item, item.size( ) );
 						auto koffer = scan_for_image( koferraum, "./img/blank.png" );
 						if ( !item.empty( ) && !koffer.empty( ) ) {
-							if ( item.size( ) > koffer.size( ) ) {
-								send_mwheel_down_msg( hWnd, { 1161, 496 } );
-								continue;
-							}
-							for ( decltype(item.size( )) i = 0; i < item.size( ); i++ ) {
-								auto [x, y] = item.at( i );
+							while ( !item.empty( ) ) {
+								if ( !take_screenshot( hWnd, rucksack, rect_rucksack ) )
+									break;
+								if ( !take_screenshot( hWnd, koferraum, rect_kofferraum ) )
+									break;
+								item = scan_for_items( rucksack, found_item );
+								if ( item.empty( ) )
+									break;
+								koffer = scan_for_image( koferraum, "./img/blank.png" );
+								if ( koffer.empty( ) ) {
+									fmt::print( "scrolling no space\n" );
+									send_mwheel_down_msg( hWnd, { 1161, 496 } );
+									continue;
+								}
+								auto [x, y] = item.at( 0 );
 								fmt::print( "Item {}[{}]: {} {}\n", globals::item_names.at( found_item ), found_item, x, y );
 
-								auto [x2, y2] = koffer.at( i );
+								auto [x2, y2] = koffer.at( 0 );
 								fmt::print( "Freier Platz im Kofferraum: {} {}\n", x2, y2 );
 
 								POINT p = { x + 435, y + 250 };
@@ -226,7 +215,7 @@ int main( ) {
 							}
 							send_key_msg( hWnd, VK_ESCAPE );
 							std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-							send_opencar_msg( hWnd );
+							send_closecar_msg( hWnd );
 						}
 						else if ( !item.empty( ) && koffer.empty( ) ) {
 							send_mwheel_down_msg( hWnd, { 1161, 496 } );
