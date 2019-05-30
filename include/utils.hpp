@@ -261,3 +261,10 @@ static std::vector< std::pair< int, int > > scan_for_items( const std::vector< u
 	}
 	return {};
 }
+
+inline void async_beep( int a, int b ) {
+	std::thread( [&a,&b]( )
+	{
+		Beep( a, b );
+	} ).detach( );
+}

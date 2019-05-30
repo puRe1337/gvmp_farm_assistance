@@ -100,7 +100,7 @@ int main( ) {
 
 					for ( auto s : globals::signal_list ) {
 						if ( string_contains( str, s ) ) {
-							Beep( 300, 300 );
+							async_beep(300, 300);
 							time_p end = std::chrono::high_resolution_clock::now( );
 							fmt::print( "Gefarmt: {}s\n", std::chrono::duration_cast< timer::seconds >( end - globals::start ).count( ) );
 						}
@@ -108,25 +108,25 @@ int main( ) {
 					if ( string_contains( str, "Farming gestartet" ) ) {
 						//Farmen gestartet
 						globals::start = std::chrono::high_resolution_clock::now( );
-						Beep( 300, 300 );
+						async_beep( 300, 300 );
 						fmt::print( "Farmen gestartet!\n" );
 					}
 					else if ( string_contains( str, "Sie kochen nun Meth" ) ) {
 						//Kochen gestartet
 						globals::start = std::chrono::high_resolution_clock::now( );
-						Beep( 300, 300 );
+						async_beep( 300, 300 );
 						fmt::print( "Kochen gestartet!\n" );
 					}
 					else if ( string_contains( str, "Meth kochen beendet!" ) ) {
 						//Kochen beendet
 						time_p end = std::chrono::high_resolution_clock::now( );
 						fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< timer::seconds >( end - globals::start ).count( ) );
-						Beep( 300, 300 );
+						async_beep( 300, 300 );
 						fmt::print( "Kochen beendet!\n" );
 					}
 					for ( auto s : globals::compare_list ) {
 						if ( string_contains( str, s ) ) {
-							Beep( 300, 300 );
+							async_beep( 300, 300 );
 							time_p end = std::chrono::high_resolution_clock::now( );
 							fmt::print( "Gekocht: {}s\n", std::chrono::duration_cast< timer::seconds >( end - globals::start ).count( ) );
 						}
@@ -146,7 +146,7 @@ int main( ) {
 					if ( !str.empty( ) ) {
 						if ( string_contains( str, "Bist du noch da" ) || string_contains( str, "ICH BIN NOCH DA" ) || string_contains( str, "anwesend" ) ) {
 							fmt::print( "AFK-Check gefunden!\n" );
-							Beep( 500, 500 );
+							async_beep( 500, 500 );
 
 							POINT p = { 960, 670 };
 							ClientToScreen( hWnd, &p );
