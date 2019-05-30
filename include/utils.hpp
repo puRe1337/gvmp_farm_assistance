@@ -5,6 +5,7 @@
 #include <gdiplus.h>
 #include <memory>
 #include <vector>
+#include <future>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
