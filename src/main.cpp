@@ -199,7 +199,7 @@ int main( ) {
 									break;
 								if ( !take_screenshot( hWnd, koferraum, rect_kofferraum ) )
 									break;
-								item = scan_for_items( rucksack, found_item );
+								item = scan_for_image( rucksack, globals::item_path.at( found_item ) );
 								if ( item.empty( ) )
 									break;
 								koffer = scan_for_image( koferraum, "./img/blank.png" );

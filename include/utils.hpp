@@ -252,21 +252,12 @@ static void send_mwheel_down_msg( HWND hWnd, POINT p ) {
 
 static std::vector< std::pair< int, int > > scan_for_items( const std::vector< uint8_t >& screen_data, globals::item_definitions& found_item ) {
 	found_item = globals::item_definitions::null;
-	auto item = scan_for_image( screen_data, "./img/Kroeten.png" );
-	found_item = globals::item_kroete;
-	if ( item.empty( ) ) {
-		item = scan_for_image( screen_data, "./img/Kroeten2.png" );
-		found_item = globals::item_kroete2;
-		if ( item.empty( ) ) {
-			item = scan_for_image( screen_data, "./img/Zinkkohle.png" );
-			found_item = globals::item_zinkkohle;
-			if ( item.empty( ) ) {
-				item = scan_for_image( screen_data, "./img/Aramidfaser.png" );
-				found_item = globals::item_aramidfaser;
-				if ( item.empty( ) )
-					found_item = globals::item_definitions::null;
-			}
+	for ( auto i = 1; i < globals::item_definitions::max_def; i++ ) {
+		auto item = scan_for_image( screen_data, globals::item_path.at( i ) );
+		if ( !item.empty( ) ) {
+			found_item = static_cast< globals::item_definitions >( i );
+			return item;
 		}
 	}
-	return item;
+	return {};
 }
