@@ -6,6 +6,7 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake Targets")
 
 project(gvmp_farm_assistance C CXX)
 set(CMAKE_CXX_STANDARD 20)
+#set(CMAKE_WIN32_EXECUTABLE TRUE)
 
 # Output directory settings
 set(output_dir ${CMAKE_BINARY_DIR}/bin)
@@ -17,24 +18,34 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
 endif()
 
-#set(CPPAN_BUILD_SHARED_LIBS ON)
-add_subdirectory(.cppan)
+set(DEPENDENCIES
+    org.sw.demo.google.tesseract.libtesseract-master
+)
+
+find_package(SW REQUIRED)
+sw_add_package(${DEPENDENCIES})
+sw_execute()
+
 add_subdirectory(fmt EXCLUDE_FROM_ALL)
 #include_directories(include)
 set(OpenCV_DIR "D:/User/Downloads/opencv-4.1.0/opencv-4.1.0/build/install")
 set(OpenCV_STATIC FALSE)
 FIND_PACKAGE(OpenCV REQUIRED core highgui imgcodecs imgproc)
 
+#set(CEF_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/cef")
+#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
+#find_package(CEF REQUIRED)
+#add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
+#PRINT_CEF_CONFIG()
 
-add_executable(gvmp_farm_assistance src/main.cpp include/utils.hpp include/timer.hpp include/globals.hpp gvmp_farm_assistance.rc)
+add_executable(gvmp_farm_assistance src/main.cpp include/utils.hpp include/timer.hpp include/globals.hpp include/resource.h gvmp_farm_assistance.rc)
 target_include_directories(gvmp_farm_assistance PUBLIC include)
 target_link_libraries(gvmp_farm_assistance
-    pvt.cppan.demo.google.tesseract.libtesseract
-    pvt.cppan.demo.danbloomberg.leptonica
+    ${DEPENDENCIES}
     fmt-header-only
     ${OpenCV_LIBS}
 )
-message(${OpenCV_LIBS})
+message("OpenCV Libs: ${OpenCV_LIBS}")
 
 MACRO (COPY_DLL trgt libname)
         ADD_CUSTOM_COMMAND (

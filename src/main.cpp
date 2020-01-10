@@ -9,7 +9,7 @@
 #pragma comment(lib, "gdiplus.lib")
 
 #include <allheaders.h> // leptonica main header for image io
-#include <baseapi.h> // tesseract main header
+#include <tesseract/baseapi.h> // tesseract main header
 #include <thread>
 #include <fstream>
 
