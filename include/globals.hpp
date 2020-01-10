@@ -26,6 +26,7 @@ namespace globals
 		item_zinkkohle,
 		item_aramidfaser,
 		item_steingemeisch,
+		item_hanfknospe,
 		max_def
 	};
 
@@ -35,7 +36,8 @@ namespace globals
 		"Kroete(n)2",
 		"Zinkkohle",
 		"Aramidfaser(n)",
-		"Steingemisch"
+		"Steingemisch",
+		"Hanfknospe"
 	};
 
 	inline std::vector< std::string > item_path = {
@@ -44,6 +46,7 @@ namespace globals
 		"./img/Kroeten2.png",
 		"./img/Zinkkohle.png",
 		"./img/Aramidfaser.png",
-		"./img/Steingemisch.png"
+		"./img/Steingemisch.png",
+		"./img/Hanfknospe.png"
 	};
 }
