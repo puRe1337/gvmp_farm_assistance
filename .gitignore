@@ -1,3 +1,6 @@
-.cppan\*
-.vs\*
-build\*
+build/*
+.cppan/*
+.vs/*
+.vscode/*
+app/*
+fmt/*
