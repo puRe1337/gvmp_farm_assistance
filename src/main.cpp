@@ -99,7 +99,7 @@ int main( ) {
 
 					for ( auto s : globals::signal_list ) {
 						if ( string_contains( str, s ) ) {
-							async_beep(300, 300);
+							async_beep( 300, 300 );
 							time_p end = std::chrono::high_resolution_clock::now( );
 							fmt::print( "Gefarmt: {}s\n", std::chrono::duration_cast< timer::seconds >( end - globals::start ).count( ) );
 						}
@@ -135,7 +135,7 @@ int main( ) {
 			}
 			if ( t2.diff( ) >= 10 ) {
 				auto col = scan_color( hWnd, 960, 670 );
-				if ( GetRValue(col) == 255 && GetGValue(col) == 151 && GetBValue(col) == 0 ) {
+				if ( GetRValue( col ) == 255 && GetGValue( col ) == 151 && GetBValue( col ) == 0 ) {
 					static Rect rect_afk = { 765, 365, 390, 380 };
 					std::vector< uint8_t > screen;
 					if ( !take_screenshot( hWnd, screen, rect_afk ) )
@@ -149,8 +149,8 @@ int main( ) {
 
 							POINT p = { 960, 670 };
 							ClientToScreen( hWnd, &p );
-							SendMessage( hWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(p.x, p.y) );
-							SendMessage( hWnd, WM_LBUTTONUP, 0, MAKELPARAM(p.x, p.y) );
+							SendMessage( hWnd, WM_LBUTTONDOWN, 0, MAKELPARAM( p.x, p.y ) );
+							SendMessage( hWnd, WM_LBUTTONUP, 0, MAKELPARAM( p.x, p.y ) );
 						}
 					}
 
@@ -161,8 +161,8 @@ int main( ) {
 			if ( globals::switch_state ) {
 				auto col1 = scan_color( hWnd, 500, 300 );
 				auto col2 = scan_color( hWnd, 1020, 300 );
-				auto check1 = GetRValue(col1) >= 254 && GetGValue(col1) >= 254 && GetBValue(col1) >= 254;
-				auto check2 = GetRValue(col2) >= 254 && GetGValue(col2) >= 254 && GetBValue(col2) >= 254;
+				auto check1 = GetRValue( col1 ) >= 254 && GetGValue( col1 ) >= 254 && GetBValue( col1 ) >= 254;
+				auto check2 = GetRValue( col2 ) >= 254 && GetGValue( col2 ) >= 254 && GetBValue( col2 ) >= 254;
 				if ( check1 && check2 ) {
 					static Rect rect_rucksack = { 453, 250, 484, 552 };
 					std::vector< uint8_t > rucksack;
