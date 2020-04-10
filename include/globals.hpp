@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 using time_p = std::chrono::high_resolution_clock::time_point;
 
