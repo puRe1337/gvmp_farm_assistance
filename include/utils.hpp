@@ -220,7 +220,7 @@ static void send_key_msg( HWND hWnd, uint32_t key ) {
 static void send_opencar_msg( HWND hWnd ) {
 	SendMessage( hWnd, WM_KEYDOWN, 0x58, 0x390000 ); // KEY X DOWN
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(1170, 379) ); // move mouse
+	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM( 1170, 379 ) ); // move mouse
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 	SendMessage( hWnd, WM_KEYUP, 0x58, 0x390000 ); // KEY X UP
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
@@ -231,25 +231,25 @@ static void send_opencar_msg( HWND hWnd ) {
 static void send_closecar_msg( HWND hWnd ) {
 	SendMessage( hWnd, WM_KEYDOWN, 0x58, 0x390000 ); // KEY X DOWN
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(1170, 379) ); // move mouse
+	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM( 1170, 379 ) ); // move mouse
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 	SendMessage( hWnd, WM_KEYUP, 0x58, 0x390000 ); // KEY X UP
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 }
 
 static void send_move_item_msg( HWND hWnd, POINT p, POINT p2 ) {
-	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p.x, p.y) ); //maus auf das item was eingelagert werden soll
+	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM( p.x, p.y ) ); //maus auf das item was eingelagert werden soll
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	SendMessage( hWnd, WM_LBUTTONDOWN, 0, MAKELPARAM(p.x, p.y) ); //klick auf "item"
+	SendMessage( hWnd, WM_LBUTTONDOWN, 0, MAKELPARAM( p.x, p.y ) ); //klick auf "item"
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM(p2.x, p2.y) ); //move to freie platz
+	SendMessage( hWnd, WM_MOUSEMOVE, 0, MAKELPARAM( p2.x, p2.y ) ); //move to freie platz
 	std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-	SendMessage( hWnd, WM_LBUTTONUP, 0, MAKELPARAM(p2.x, p2.y) );
+	SendMessage( hWnd, WM_LBUTTONUP, 0, MAKELPARAM( p2.x, p2.y ) );
 }
 
 static void send_mwheel_down_msg( HWND hWnd, POINT p ) {
 	//0xff880000 down, 0x00780000 up
-	SendMessage( hWnd, WM_MOUSEWHEEL, 0xff880000, MAKELPARAM(p.x ,p.y) );
+	SendMessage( hWnd, WM_MOUSEWHEEL, 0xff880000, MAKELPARAM( p.x, p.y ) );
 }
 
 static std::vector< std::pair< int, int > > scan_for_items( const std::vector< uint8_t >& screen_data, globals::item_definitions& found_item ) {
