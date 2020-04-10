@@ -4,7 +4,7 @@ using time_p = std::chrono::high_resolution_clock::time_point;
 
 namespace globals
 {
-	constexpr auto window_name = "RAGE Multiplayer";
+	constexpr auto window_name = L"RАGЕ Multiрlayеr ";
 
 	inline auto switch_state = false;
 	inline time_p start{};

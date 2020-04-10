@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 #include <future>
+#include <codecvt>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
@@ -265,4 +266,9 @@ static std::vector< std::pair< int, int > > scan_for_items( const std::vector< u
 
 inline void async_beep( int a, int b ) {
 	auto ret = std::async( std::launch::async, [&]( ) { Beep( a, b ); } );
+}
+
+std::string utf8_to_wstring( const std::wstring& str ) {
+	std::wstring_convert< std::codecvt_utf8< wchar_t > > myconv;
+	return myconv.to_bytes( str );
 }

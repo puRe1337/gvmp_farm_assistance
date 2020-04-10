@@ -39,13 +39,12 @@ int main( ) {
 	tess.SetVariable( "debug_file", "tesseract.log" );
 	std::ofstream log( "ocr_log.txt", std::fstream::app );
 
-	HWND hWnd = FindWindow( 0, globals::window_name );
+	HWND hWnd = FindWindowW( 0, globals::window_name );
 	if ( !hWnd ) {
-		fmt::print( "Open {}!\n", globals::window_name );
+		fmt::print( "Open {}!\n", utf8_to_wstring( globals::window_name ) );
 		std::cin.get( );
 		return 0;
 	}
-
 
 	timer t;
 	t.reset( );
@@ -56,7 +55,7 @@ int main( ) {
 	auto t3_reset_once = true;
 	try {
 		while ( 1 ) {
-			hWnd = FindWindow( 0, globals::window_name );
+			hWnd = FindWindowW( 0, globals::window_name );
 			if ( !hWnd ) {
 				if ( t3_reset_once ) {
 					t3_reset_once = false;
@@ -242,7 +241,7 @@ int main( ) {
 	tess.Clear( );
 	tess.End( );
 	CoUninitialize( );
-	fmt::print( "Open {}!\n", globals::window_name );
+	fmt::print( "Open {}!\n", utf8_to_wstring( globals::window_name ) );
 	std::cin.get( );
 
 
