@@ -17,6 +17,7 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "/MT")
     set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
 endif()
+add_definitions(-D_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS)
 
 set(DEPENDENCIES
     org.sw.demo.google.tesseract.libtesseract-master
